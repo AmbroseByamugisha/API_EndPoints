@@ -1,71 +1,96 @@
-from flask import Flask, json, request
+from flask import Flask, json, request, jsonify
 app = Flask(__name__)
 
 # all my products static data
 products = [
     {
+        "product_id": 1,
         "name": "paper",
         "quantity": "10",
         "quality":"good"
     },
-    {
+    {  
+        "product_id": 2,
         "name": "bags",
         "quantity": "5",
         "quality": "poor"
     },
     {
+        "product_id": 3,
         "name": "shirts",
         "quantity": "100",
         "quality": "excellent"
     }
 ]
 
-# Hello world
-@app.route('/')
-def index():
-    return '<h1>Hello World!</h1>'
-# trial 1
-@app.route('/user/<name>')
-def user(name):
-    return '<h1>Hello, %s!</h1>' % name
+# all sales records
+sales = [
+    {
+        "sale_id": 1,
+        "item": "paper",
+        "amount": "1000"
+    },
+    {
+        "sale_id": 2,
+        "item": "computer",
+        "amount": "400"
+    },
+    {
+        "sale_id": 3,
+        "item": "tables",
+        "amount": "340"
+    }
+]
+
 
 # admin/store attendant can get all products
-@app.route('/products', methods=['GET'])
-def products():
-    return '<h1>my products are</h1> ' + json.dumps([{"name": "paper", "qty": "6", "desc": "good"}])
-    #return json.dumps(products)
-    # how to get my static data
-    # test my single route
-
+@app.route('/todo/api/v1/products', methods=['GET'])
+def get_all_products():
+    prod = []
+    for product in products:
+        prod.append(product)
+    return jsonify ({'products': prod}) 
+ 
 # admin/store attendant can get a specific product
-@app.route('/product/<int:id>', methods=['GET', 'POST'])
-def product(id):
-    return '<h1>my product is</h1> %d' % id
+@app.route('/todo/api/v1/products/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    product = [product for product in products if product["product_id"] == product_id]
+    return jsonify({'product': product[0]})
 
-# admin can get all sales records
-# specify roles with admin
-# use Boolean
-@app.route('/sales', methods=['GET'])
-def sales():
-    return '<h1>Sales</h1> ' + json.dumps([{"sales_id": "1", "items": "soap", "desc": "good"}])
-
-# admin can add a product
-# need to add roles and apply Boolean logic
-# like is _admin = True or False
-@app.route('/add_product', methods=['POST'])
+# admin can add a new product
+@app.route('/todo/api/v1/add_product', methods=['POST'])
 def add_product():
-    if request.method == 'POST':
-        return 'Product successfully added.'
-    else:
-        return 'Nothing done.'
+    product = request.get_json()
+    product_id = product['product_id']
+    name = product['name']
+    quantity = product['quantity']
+    quality = product['quality']
+    products.append(product)
+    return jsonify(products)
+
+# admin/store attendant can get all sales records
+@app.route('/todo/api/v1/sales', methods=['GET'])
+def get_all_sales():
+    data = []
+    for sale in sales:
+        data.append(sale)
+    return jsonify({'sales': data})
+
+# admin/store attendant can fetch a single sale record
+@app.route('/todo/api/v1/sales/<int:sale_id>', methods=['GET'])
+def get_sale(sale_id):
+    sale = [sale for sale in sales if sale["sale_id"] == sale_id]
+    return jsonify({'sale': sale[0]})
     
-# store attendant can add a sale order
-@app.route('/add_sale', methods=['POST'])
+# store attendant can create a sale order
+@app.route('/todo/api/v1/add_sale', methods=['POST'])
 def add_sale():
-    if request.method == 'POST':
-        return 'Sale Order successfully added.'
-    else:
-        return 'Sales order failed.'
+    sale = request.get_json()
+    sale_id = sale['sale_id']
+    item = sale['item']
+    amount = sale['amount']
+    sales.append(sale)
+    return jsonify(sales)
 
 if __name__ == '__main__':
     app.run(debug=True)
