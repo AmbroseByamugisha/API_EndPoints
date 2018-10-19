@@ -42,6 +42,10 @@ sales = [
     }
 ]
 
+# home page
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify('This is Home Page')
 
 # admin/store attendant can get all products
 @app.route('/todo/api/v1/products', methods=['GET'])
@@ -58,7 +62,7 @@ def get_product(product_id):
     return jsonify({'product': product[0]})
 
 # admin can add a new product
-@app.route('/todo/api/v1/add_product', methods=['POST'])
+@app.route('/todo/api/v1/products', methods=['POST'])
 def add_product():
     product = request.get_json()
     product_id = product['product_id']
@@ -83,7 +87,7 @@ def get_sale(sale_id):
     return jsonify({'sale': sale[0]})
     
 # store attendant can create a sale order
-@app.route('/todo/api/v1/add_sale', methods=['POST'])
+@app.route('/todo/api/v1/sales', methods=['POST'])
 def add_sale():
     sale = request.get_json()
     sale_id = sale['sale_id']
